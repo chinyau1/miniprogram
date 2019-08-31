@@ -15,9 +15,7 @@ import java.util.List;
 @Builder
 public class Result {
     private List<ChoseList> choseList;
-    private int isOk;
+    private Integer isOk;
     private String title;
     private int type;
-
-    private int judge;
 }

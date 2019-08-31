@@ -20,4 +20,6 @@ public class History {
     private int judge;
 
     private List<ChoseList> choseList;
+
+    private int type;
 }

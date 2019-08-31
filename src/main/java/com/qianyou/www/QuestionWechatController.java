@@ -82,7 +82,10 @@ public class QuestionWechatController {
             if (null != addHistoryRequest) {
                 List<Result> result = addHistoryRequest.getResult();
                 for (Result result1 : result) {
-                    questionList.add(History.builder().judge(result1.getJudge()).choseList(result1.getChoseList()).build());
+                    if(null == result1.getIsOk() || 0 != result1.getIsOk()){
+                        break;
+                    }
+                    questionList.add(History.builder().judge(result1.getIsOk()).choseList(result1.getChoseList()).type(result1.getType()).build());
                 }
 
                 return CheckSaveHistoryResponse.builder()
