@@ -82,7 +82,8 @@ public class QuestionWechatController {
             if (null != addHistoryRequest) {
                 List<Result> result = addHistoryRequest.getResult();
                 for (Result result1 : result) {
-                    if(null == result1.getIsOk() || 0 != result1.getIsOk()){
+                    //为空表示没有作答，0-表示答错，1-表示答对
+                    if(null == result1.getIsOk()){
                         break;
                     }
                     questionList.add(History.builder().judge(result1.getIsOk()).choseList(result1.getChoseList()).type(result1.getType()).build());

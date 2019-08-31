@@ -17,7 +17,7 @@ public class History {
     /**
      * 0-错误，1-正确
      */
-    private int judge;
+    private Integer judge;
 
     private List<ChoseList> choseList;
 
