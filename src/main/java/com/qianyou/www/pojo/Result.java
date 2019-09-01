@@ -14,8 +14,28 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Result {
+    /**
+     * 当前选择
+     */
+    private List<String> choose;
+    /**
+     * 选择列表的信息
+     */
     private List<ChoseList> choseList;
+    /**
+     * null未选择, 0-错误，1-正确
+     */
     private Integer isOk;
+    /**
+     * 0-错误，1-正确
+     */
+    private Integer judge;
+    /**
+     * 题目
+     */
     private String title;
+    /**
+     * 题目类型
+     */
     private int type;
 }

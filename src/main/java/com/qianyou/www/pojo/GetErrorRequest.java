@@ -6,11 +6,11 @@ import lombok.Data;
 
 /**
  * @author qianyou.huang
- * @date 2019-09-01 03:46
+ * @date 2019-09-01 10:25
  */
 @Data
 @AllArgsConstructor
 @Builder
-public class CheckSaveHistoryRequest {
+public class GetErrorRequest {
     private Integer id;
 }

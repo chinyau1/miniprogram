@@ -17,7 +17,7 @@ public class AddHistoryRequest {
     /**
      * 科目id
      */
-    private Long menu;
+    private Integer menu;
 
     /**
      * 分数

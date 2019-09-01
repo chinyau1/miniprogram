@@ -6,11 +6,12 @@ import lombok.Data;
 
 /**
  * @author qianyou.huang
- * @date 2019-09-01 03:46
+ * @date 2019-09-01 12:53
  */
 @Data
 @AllArgsConstructor
 @Builder
-public class CheckSaveHistoryRequest {
-    private Integer id;
+public class GetBeatNumRequest {
+    private Integer menu;
+    private Integer score;
 }

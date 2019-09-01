@@ -4,13 +4,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author qianyou.huang
- * @date 2019-09-01 03:46
+ * @date 2019-09-01 12:55
  */
 @Data
 @AllArgsConstructor
 @Builder
-public class CheckSaveHistoryRequest {
-    private Integer id;
+public class GetAverageResponse {
+    private Integer num;
+    private List<Average> result;
 }

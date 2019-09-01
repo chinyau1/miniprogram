@@ -6,12 +6,11 @@ import lombok.Data;
 
 /**
  * @author qianyou.huang
- * @date 2019-08-31 23:42
+ * @date 2019-09-01 11:43
  */
 @Data
 @AllArgsConstructor
 @Builder
-public class UserInfo {
-    private String avatarUrl;
-    private String nickName;
+public class GetHistoryRequest {
+    private Integer id;
 }

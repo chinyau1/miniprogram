@@ -12,5 +12,5 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class GetUserInfoResponse {
-    private UserInfo result;
+    private User result;
 }

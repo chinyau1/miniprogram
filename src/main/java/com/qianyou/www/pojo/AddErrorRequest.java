@@ -4,21 +4,24 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * @author qianyou.huang
- * @date 2019-08-31 22:44
+ * @date 2019-09-01 10:53
  */
 @Data
 @AllArgsConstructor
 @Builder
-public class ChoseList {
-    private int id;
+public class AddErrorRequest {
     /**
-     * 选项内容
+     * 科目id
      */
-    private String item;
+    private Integer id;
     /**
-     * 是否为正确答案
+     * 科目名
      */
-    private Boolean isChose;
+    private String questionMenu;
+
+    private List<Result> err;
 }
