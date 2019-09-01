@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class GetHistoryListResponse {
-    private Integer result;
-    private List<String> data;
+    private boolean result;
+    private List<HistoryList> data;
 
 }

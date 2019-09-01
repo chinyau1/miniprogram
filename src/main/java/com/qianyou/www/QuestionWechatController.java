@@ -79,26 +79,45 @@ public class QuestionWechatController {
 
     @RequestMapping(value = "/checkSaveHistory", method = RequestMethod.POST)
     public CheckSaveHistoryResponse checkSaveHistory(@RequestBody CheckSaveHistoryRequest checkSaveHistoryRequest) {
+        boolean isHaveHistory = false;
         if (null != checkSaveHistoryRequest && null != checkSaveHistoryRequest.getId()) {
             AddHistoryRequest addHistoryRequest = history.get(checkSaveHistoryRequest.getId());
             List<History> questionList = new ArrayList<>();
 
-            if (null != addHistoryRequest) {
-                List<Result> result = addHistoryRequest.getResult();
-                for (Result result1 : result) {
-                    //为空表示没有作答，0-表示答错，1-表示答对
-                    if(null == result1.getIsOk()){
-                        break;
+            if (null != addHistoryRequest && !CollectionUtils.isEmpty(addHistoryRequest.getResult())) {
+                List<Result> resultList = addHistoryRequest.getResult();
+                for (int i = 0; i < resultList.size(); i++) {
+                    Result result = resultList.get(i);
+
+                    //第一个答了，说明有答过题目
+                    if(0 == i){
+                        if(!CollectionUtils.isEmpty(result.getChoose())){
+                            isHaveHistory = true;
+                            continue;
+                        }
                     }
-                    questionList.add(History.builder().judge(result1.getIsOk()).choseList(result1.getChoseList()).type(result1.getType()).build());
+
+                    //将接下来的题目进行
+                    if(isHaveHistory){
+                        if(CollectionUtils.isEmpty(result.getChoose())){
+                            questionList.add(History.builder().
+                                    judge(result.getIsOk())
+                                    .choseList(result.getChoseList())
+                                    .type(result.getType())
+                                    .title(result.getTitle())
+                                    .build());
+                        }
+                    }
                 }
 
                 CheckSaveHistoryResponse build = CheckSaveHistoryResponse.builder()
-                        .result(result)
+                        .result(resultList)
                         .data(HistoryItem.builder()
                                 .questionList(questionList)
-                                .minute(addHistoryRequest.getMinutes())
-                                .second(addHistoryRequest.getSeconds())
+//                                .minute(addHistoryRequest.getMinutes())
+//                                .second(addHistoryRequest.getSeconds())
+                                .minute("50:")
+                                .second(30)
                                 .build())
                         .build();
                 System.out.println("checkSaveHistory:"+JSON.toJSONString(build));
@@ -127,6 +146,22 @@ public class QuestionWechatController {
 
     @RequestMapping(value = "/addHistory", method = RequestMethod.POST)
     public AddHistoryResponse addHistory(@RequestBody AddHistoryRequest addHistoryRequest) {
+        //之前有
+        AddHistoryRequest addHistoryRequestOld = history.get(addHistoryRequest.getMenu());
+        if(null != addHistoryRequestOld){
+            List<Result> resultOldAll = addHistoryRequestOld.getResult();
+            List<Result> all = new ArrayList<>();
+            for (Result result : resultOldAll) {
+                if(!CollectionUtils.isEmpty(result.getChoose())){
+                    all.add(result);
+                }else{
+                    break;
+                }
+            }
+            all.addAll(addHistoryRequest.getResult());
+            addHistoryRequest.setResult(all);
+        }
+
         history.put(addHistoryRequest.getMenu(), addHistoryRequest);
         AddHistoryResponse build = AddHistoryResponse.builder().result(addHistoryRequest.getMenu()).build();
         System.out.println("addHistory:"+JSON.toJSONString(build));
@@ -151,9 +186,24 @@ public class QuestionWechatController {
 
     @RequestMapping(value = "/addError", method = RequestMethod.POST)
     public void addError(@RequestBody AddErrorRequest addErrorRequest) {
+        AddErrorRequest addErrorRequestOld = ERRORMAP.get(addErrorRequest.getId());
+        List<Result> all = new ArrayList<>();
+        //有老数据
+        if(null != addErrorRequestOld){
+            List<Result> err = addErrorRequestOld.getErr();
+            for (Result result : err) {
+                List<String> choose = result.getChoose();
+                if(!CollectionUtils.isEmpty(choose)){
+                    all.add(result);
+                }else{
+                    break;
+                }
+            }
+
+            all.addAll(addErrorRequest.getErr());
+            addErrorRequest.setErr(all);
+        }
         ERRORMAP.put(addErrorRequest.getId(), addErrorRequest);
-        System.out.println();
-//        return AddErrorResponse.builder().build();
     }
 
     @RequestMapping(value = "/getError", method = RequestMethod.POST)
@@ -165,8 +215,8 @@ public class QuestionWechatController {
                     .result(false)
                     .build();
         }
-        List<Error> error = new ArrayList<>();
 
+        List<Error> error = new ArrayList<>();
         List<Result> err = addErrorRequest.getErr();
         List<Result> questionList = new ArrayList<>();
         for (Result result : err) {
@@ -192,21 +242,45 @@ public class QuestionWechatController {
     @RequestMapping(value = "/getHistory", method = RequestMethod.POST)
     public GetHistoryResponse getHistory(@RequestBody GetHistoryRequest getHistoryRequest) {
         AddHistoryRequest addHistoryRequest = history.get(getHistoryRequest.getId());
+        if(null != addHistoryRequest){
+            List<HistoryList> historyLists = new ArrayList<>();
+            historyLists.add(HistoryList.builder()
+                    .createdAt("qioajo adsfas")
+                    .objectId(addHistoryRequest.getMenu())
+                    .questionMenu(addHistoryRequest.getQuestionMenu())
+                    .build());
+            return GetHistoryResponse.builder()
+                    .result(HistoryResult.builder()
+                            .menu(addHistoryRequest.getMenu())
+                            .score(addHistoryRequest.getScore())
+                            .questionList(addHistoryRequest.getResult())
+                            .build())
+                    .data(historyLists)
+                    .build();
+        }
+
         return GetHistoryResponse.builder()
-                .result(HistoryResult.builder()
-                        .menu(addHistoryRequest.getMenu())
-                        .score(addHistoryRequest.getScore())
-                        .questionList(addHistoryRequest.getResult())
-                        .build())
-                .data(Arrays.asList("Apple", "Orange"))
+                .result(new HistoryResult())
+                .data(new ArrayList<HistoryList>())
                 .build();
     }
 
     @RequestMapping(value = "/getHistoryList", method = RequestMethod.POST)
     public GetHistoryListResponse getHistoryList() {
+        List<HistoryList> data = new ArrayList<>();
+        data.add(HistoryList.builder()
+                .createdAt("qian asdfs")
+                .objectId(1)
+                .questionMenu("计算机等级")
+                .build());
+        data.add(HistoryList.builder()
+                .createdAt("qian22 asdfs2")
+                .objectId(2)
+                .questionMenu("英语")
+                .build());
         return GetHistoryListResponse.builder()
-                .result(200)
-                .data(Arrays.asList("Apple", "Orange"))
+                .result(true)
+                .data(data)
                 .build();
     }
 

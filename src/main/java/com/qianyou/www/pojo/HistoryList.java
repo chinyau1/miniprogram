@@ -4,16 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 /**
  * @author qianyou.huang
- * @date 2019-09-01 11:43
+ * @date 2019-09-01 19:32
  */
 @Data
 @AllArgsConstructor
 @Builder
-public class GetHistoryResponse {
-    private HistoryResult result;
-    private List<HistoryList> data;
+public class HistoryList {
+    private String createdAt;
+    private Integer objectId;
+    private String questionMenu;
 }

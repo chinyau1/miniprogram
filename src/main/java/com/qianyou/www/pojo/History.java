@@ -22,4 +22,9 @@ public class History {
     private List<ChoseList> choseList;
 
     private int type;
+
+    /**
+     * 题目
+     */
+    private String title;
 }
