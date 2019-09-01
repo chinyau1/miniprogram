@@ -12,5 +12,5 @@ import lombok.Data;
 @AllArgsConstructor
 @Builder
 public class GetHistoryRequest {
-    private Integer id;
+    private String id;
 }
