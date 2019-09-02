@@ -1,4 +1,4 @@
-package com.qianyou.www;
+package com.qianyou.www.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

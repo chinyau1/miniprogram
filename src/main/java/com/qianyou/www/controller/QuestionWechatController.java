@@ -1,4 +1,4 @@
-package com.qianyou.www;
+package com.qianyou.www.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
