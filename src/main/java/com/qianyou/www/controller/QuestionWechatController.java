@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Controller
+@RestController
 @RequestMapping(value = "/api")
 public class QuestionWechatController {
     private static QuestionMenu CUMPUTER = QuestionMenu.builder().name("计算机基础").objectId(1).menu(Menu.builder().time(90).questionNum(70).build()).build();
@@ -341,7 +341,6 @@ public class QuestionWechatController {
      * @return
      */
     @RequestMapping(value = "/buildApi", method = RequestMethod.POST)
-    @ResponseBody
     public void buildApi(HttpServletResponse response, @RequestBody GetJsonRequest getJsonRequest) {
         String filePath = getJsonRequest.getFilePath();
         File file = new File(filePath);
