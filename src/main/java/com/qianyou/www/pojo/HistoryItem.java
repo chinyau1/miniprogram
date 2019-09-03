@@ -1,6 +1,5 @@
 package com.qianyou.www.pojo;
 
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

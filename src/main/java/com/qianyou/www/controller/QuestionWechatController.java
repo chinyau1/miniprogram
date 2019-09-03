@@ -2,17 +2,26 @@ package com.qianyou.www.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.qianyou.www.pojo.*;
 import com.qianyou.www.pojo.Error;
+import com.qianyou.www.pojo.*;
+import com.qianyou.www.util.DocUtil;
+import com.qianyou.www.util.QuestionToJsonUtil;
+import com.qianyou.www.util.ZipBuildUtil;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@RestController
+@Controller
+@RequestMapping(value = "/api")
 public class QuestionWechatController {
     private static QuestionMenu CUMPUTER = QuestionMenu.builder().name("计算机基础").objectId(1).menu(Menu.builder().time(90).questionNum(70).build()).build();
     private static QuestionMenu ENGLISH = QuestionMenu.builder().name("公共英语").objectId(2).menu(Menu.builder().time(90).questionNum(120).build()).build();
@@ -42,7 +51,7 @@ public class QuestionWechatController {
                         .nickName("qianyou")
                         .build())
                 .build();
-        System.out.println("getUserInfo:"+JSON.toJSON(qianyou));
+        System.out.println("getUserInfo:" + JSON.toJSON(qianyou));
         return qianyou;
     }
 
@@ -53,7 +62,7 @@ public class QuestionWechatController {
         GetQuestionMenuResponse build = GetQuestionMenuResponse.builder()
                 .result(result)
                 .build();
-        System.out.println("getQuestionMenu:"+JSON.toJSONString(build));
+        System.out.println("getQuestionMenu:" + JSON.toJSONString(build));
         return build;
     }
 
@@ -65,7 +74,7 @@ public class QuestionWechatController {
                 GetMenuByIdResponse build = GetMenuByIdResponse.builder()
                         .result(questionMenu.getMenu())
                         .build();
-                System.out.println("getMenuById:"+JSON.toJSONString(build));
+                System.out.println("getMenuById:" + JSON.toJSONString(build));
                 return build;
             }
             return GetMenuByIdResponse.builder()
@@ -90,16 +99,16 @@ public class QuestionWechatController {
                     Result result = resultList.get(i);
 
                     //第一个答了，说明有答过题目
-                    if(0 == i){
-                        if(!CollectionUtils.isEmpty(result.getChoose())){
+                    if (0 == i) {
+                        if (!CollectionUtils.isEmpty(result.getChoose())) {
                             isHaveHistory = true;
                             continue;
                         }
                     }
 
                     //将接下来的题目进行
-                    if(isHaveHistory){
-                        if(CollectionUtils.isEmpty(result.getChoose())){
+                    if (isHaveHistory) {
+                        if (CollectionUtils.isEmpty(result.getChoose())) {
                             questionList.add(History.builder().
                                     judge(result.getIsOk())
                                     .choseList(result.getChoseList())
@@ -120,7 +129,7 @@ public class QuestionWechatController {
                                 .second(30)
                                 .build())
                         .build();
-                System.out.println("checkSaveHistory:"+JSON.toJSONString(build));
+                System.out.println("checkSaveHistory:" + JSON.toJSONString(build));
                 return build;
             }
         }
@@ -135,7 +144,7 @@ public class QuestionWechatController {
                 GetQuestionsResponse build = GetQuestionsResponse.builder()
                         .result(questionsList)
                         .build();
-                System.out.println("getQuestions:"+JSON.toJSONString(build));
+                System.out.println("getQuestions:" + JSON.toJSONString(build));
                 return build;
             }
         }
@@ -148,13 +157,13 @@ public class QuestionWechatController {
     public AddHistoryResponse addHistory(@RequestBody AddHistoryRequest addHistoryRequest) {
         //之前有
         AddHistoryRequest addHistoryRequestOld = history.get(addHistoryRequest.getMenu());
-        if(null != addHistoryRequestOld){
+        if (null != addHistoryRequestOld) {
             List<Result> resultOldAll = addHistoryRequestOld.getResult();
             List<Result> all = new ArrayList<>();
             for (Result result : resultOldAll) {
-                if(!CollectionUtils.isEmpty(result.getChoose())){
+                if (!CollectionUtils.isEmpty(result.getChoose())) {
                     all.add(result);
-                }else{
+                } else {
                     break;
                 }
             }
@@ -164,7 +173,7 @@ public class QuestionWechatController {
 
         history.put(String.valueOf(addHistoryRequest.getMenu()), addHistoryRequest);
         AddHistoryResponse build = AddHistoryResponse.builder().result(addHistoryRequest.getMenu()).build();
-        System.out.println("addHistory:"+JSON.toJSONString(build));
+        System.out.println("addHistory:" + JSON.toJSONString(build));
         return build;
     }
 
@@ -189,13 +198,13 @@ public class QuestionWechatController {
         AddErrorRequest addErrorRequestOld = ERRORMAP.get(addErrorRequest.getId());
         List<Result> all = new ArrayList<>();
         //有老数据
-        if(null != addErrorRequestOld){
+        if (null != addErrorRequestOld) {
             List<Result> err = addErrorRequestOld.getErr();
             for (Result result : err) {
                 List<String> choose = result.getChoose();
-                if(!CollectionUtils.isEmpty(choose)){
+                if (!CollectionUtils.isEmpty(choose)) {
                     all.add(result);
-                }else{
+                } else {
                     break;
                 }
             }
@@ -209,7 +218,7 @@ public class QuestionWechatController {
     @RequestMapping(value = "/getError", method = RequestMethod.POST)
     public GetErrorResponse getError(@RequestBody GetErrorRequest getErrorRequest) {
         AddErrorRequest addErrorRequest = ERRORMAP.get(getErrorRequest.getId());
-        if(null == addErrorRequest){
+        if (null == addErrorRequest) {
             return GetErrorResponse.builder()
                     .error(new ArrayList<Error>())
                     .result(false)
@@ -220,11 +229,11 @@ public class QuestionWechatController {
         List<Result> err = addErrorRequest.getErr();
         List<Result> questionList = new ArrayList<>();
         for (Result result : err) {
-            if(!CollectionUtils.isEmpty(result.getChoose())){
-                if(null != result.getJudge() && 0 == result.getJudge()){
+            if (!CollectionUtils.isEmpty(result.getChoose())) {
+                if (null != result.getJudge() && 0 == result.getJudge()) {
                     questionList.add(result);
                 }
-            }else{
+            } else {
                 break;
             }
         }
@@ -242,7 +251,7 @@ public class QuestionWechatController {
     @RequestMapping(value = "/getHistory", method = RequestMethod.POST)
     public GetHistoryResponse getHistory(@RequestBody GetHistoryRequest getHistoryRequest) {
         AddHistoryRequest addHistoryRequest = history.get(getHistoryRequest.getId());
-        if(null != addHistoryRequest){
+        if (null != addHistoryRequest) {
             List<HistoryList> historyLists = new ArrayList<>();
             historyLists.add(HistoryList.builder()
                     .createdAt("qioajo adsfas")
@@ -325,5 +334,37 @@ public class QuestionWechatController {
                 .result(data.size() > 0)
                 .data(data)
                 .build();
+    }
+
+    /**
+     * 批量查询id
+     * @return
+     */
+    @RequestMapping(value = "/buildApi", method = RequestMethod.POST)
+    @ResponseBody
+    public void buildApi(HttpServletResponse response, @RequestBody GetJsonRequest getJsonRequest) {
+        String filePath = getJsonRequest.getFilePath();
+        File file = new File(filePath);
+        String json = "";
+        try {
+            String string = DocUtil.doc2String(file);
+            String s = string.substring(0, string.indexOf("1、"));
+            String replace = string.replace(s, "");
+            json = QuestionToJsonUtil.getJson(replace);
+
+//            int i = filePath.lastIndexOf("/");
+//            String fileName = filePath.substring(i + 1);
+//            byte[] build = ZipBuildUtil.build(json, fileName + ".json");
+
+            //这句话的意思，是让浏览器用utf8来解析返回的数据
+            response.setHeader("Content-type", "text/html;charset=UTF-8");
+            //这句话的意思，是告诉servlet用UTF-8转码，而不是用默认的ISO8859
+            response.setCharacterEncoding("UTF-8");
+            PrintWriter pw = response.getWriter();
+            pw.write(json);
+//            ZipBuildUtil.downLoad(response, build, "json");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
